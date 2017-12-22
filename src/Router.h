@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include <proxygen/httpserver/HTTPServer.h>
 #include "XConfig.h"
 #include "XHttpMethod.h"
@@ -12,13 +13,18 @@
 class Router {
  private:
   XConfig _config;
+  //std::atomic<std::map<std::string, std::pair<XHttpMethod, std::shared_ptr<std::function<void(XrpcRequest)>>>>> route_list;
 
  public:
   explicit Router(XConfig &&config) : _config(config) {
 
   }
 
-  void addRoute(std::string handler, void (*pFunction)(XrpcRequest), XHttpMethod method) {
+  static auto makeShared(std::function<void(XrpcRequest)> handler) {
+    return std::make_shared<std::function<void(XrpcRequest)>>(handler);
+  }
+
+  void addRoute(std::string route, std::shared_ptr<std::function<void(XrpcRequest)>> handler, XHttpMethod method) {
 
   }
 
@@ -48,8 +54,8 @@ class Router {
         .addThen<RouterHandlerFactory>()
         .build();
 
-    options.h2cEnabled = true;
-    options.supportsConnect = true;
+    //options.h2cEnabled = true;
+    //options.supportsConnect = true;
 
     auto server = std::make_unique<proxygen::HTTPServer>(std::move(options));
 

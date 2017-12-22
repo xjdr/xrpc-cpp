@@ -1,4 +1,3 @@
-#include <utility>
 #include "XConfig.h"
 #include "Router.h"
 
@@ -22,7 +21,7 @@ int main(int argc, char* argv[]) {
 
   Router router(std::move(config));
 
-  router.addRoute("/people", peopleHandler, XHttpMethod::GET);
+  router.addRoute("/people", Router::makeShared(peopleHandler), XHttpMethod::GET);
   router.listenAndServe();
   return 0;
 }
