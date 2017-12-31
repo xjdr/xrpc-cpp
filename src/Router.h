@@ -4,6 +4,7 @@
 
 #include <string>
 #include <map>
+#include <utility>
 #include <vector>
 #include <proxygen/httpserver/HTTPServer.h>
 #include "XConfig.h"
@@ -26,7 +27,7 @@ class Router {
   }
 
   void addRoute(std::string route, std::shared_ptr<std::function<void(XrpcRequest)>> handler) {
-    addRoute(route, handler, XHttpMethod::ANY);
+    addRoute(std::move(route), std::move(handler), XHttpMethod::ANY);
   }
 
   void addRoute(std::string route, std::shared_ptr<std::function<void(XrpcRequest)>> handler, XHttpMethod method) {
@@ -43,7 +44,7 @@ class Router {
 
       if (itr != route_list.end()) {
         auto vec = itr->second;
-        vec.push_back(std::make_pair(method, handler));
+        vec.emplace_back(method, handler);
 
       } else {
         auto vec = {std::make_pair(method, handler)};

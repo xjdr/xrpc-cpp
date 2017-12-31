@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(xrpc_cpp)
 
 # package information
@@ -11,6 +11,10 @@ set(PACKAGE_BUGREPORT "https://github.com/xjdr/xrpc-cpp/issues")
 set(CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(CMAKE_CXX_FLAGS "-std=c++1y")
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "-std=c++1y")
 endif()
 
@@ -27,9 +31,20 @@ if (LINUX)
     link_directories(/usr/local/lib /usr/local/lib64)
 endif ()
 
-set(SOURCE_FILES src/XConfig.h src/Router.h src/XHttpMethod.h src/XrpcRequest.h src/RouterHandlerFactory.h src/RouterHandler.h src/RouterHandler.cpp src/RouterStats.h src/SessionWrapper.h)
+# External dependencies
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external)
+
+#External Deps
+include(re2)
+include(zlib)
+include(jemalloc)
+include(protobuf)
+include(boringssl)
+include(googletest)
+
+set(SOURCE_FILES src/XConfig.h src/Router.h src/XHttpMethod.h src/XrpcRequest.h src/RouterHandlerFactory.h src/RouterHandler.h src/RouterHandler.cpp src/RouterStats.h src/SessionWrapper.h src/Route.h)
 add_library(xrpc_cpp ${SOURCE_FILES})
-target_link_libraries(xrpc_cpp -lcrypto -lssl -lfolly -lwangle -lproxygenhttpserver -lproxygenlib -lglog -lgflags -ljemalloc -lboost_system)
+target_link_libraries(xrpc_cpp ${boringssl_STATIC_LIBRARIES} ${re2_STATIC_LIBRARIES} ${jemalloc_STATIC_LIBRARIES} -lfolly -lwangle -lproxygenhttpserver -lproxygenlib -lglog -lgflags -lboost_system)
 
 if (APPLE)
     target_link_libraries(xrpc_cpp -lboost_thread-mt)
@@ -42,3 +57,8 @@ endif ()
 ## Add an example server for testing
 add_executable(example_server src/ExampleServer.cpp)
 target_link_libraries(example_server xrpc_cpp)
+
+## Add an example server for testing
+add_executable(xrpc_cpp_test src/RouterTest.cpp src/RouterTest.cpp)
+link_libraries(xrpc_cpp_test ${googletest_STATIC_LIBRARIES})
+include_directories(xrpc_cpp_test ${googletest_INCLUDE_DIRS})

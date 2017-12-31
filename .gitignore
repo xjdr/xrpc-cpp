@@ -11,3 +11,10 @@ example_server
 .idea/
 *.a
 *.cbp
+boringssl/
+googletest/
+jemalloc/
+protobuf/
+re2/
+zlib/
+xrpc_cpp_test
