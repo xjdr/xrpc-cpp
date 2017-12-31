@@ -4,6 +4,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <proxygen/httpserver/HTTPServer.h>
 #include "XConfig.h"
 #include "XHttpMethod.h"
@@ -13,7 +14,7 @@
 class Router {
  private:
   XConfig _config;
-  //std::atomic<std::map<std::string, std::pair<XHttpMethod, std::shared_ptr<std::function<void(XrpcRequest)>>>>> route_list;
+  std::map<std::string, std::vector<std::pair<XHttpMethod, std::shared_ptr<std::function<void(XrpcRequest)>>>>> route_list;
 
  public:
   explicit Router(XConfig &&config) : _config(config) {
@@ -24,7 +25,32 @@ class Router {
     return std::make_shared<std::function<void(XrpcRequest)>>(handler);
   }
 
+  void addRoute(std::string route, std::shared_ptr<std::function<void(XrpcRequest)>> handler) {
+    addRoute(route, handler, XHttpMethod::ANY);
+  }
+
   void addRoute(std::string route, std::shared_ptr<std::function<void(XrpcRequest)>> handler, XHttpMethod method) {
+
+    if (route_list.empty()) {
+      std::map<std::string, std::vector<std::pair<XHttpMethod, std::shared_ptr<std::function<void(XrpcRequest)>>>>>
+          route_map_list;
+
+      auto vec = {std::make_pair(method, handler)};
+      route_map_list.emplace(route, vec);
+
+    } else {
+      auto itr = route_list.find(route);
+
+      if (itr != route_list.end()) {
+        auto vec = itr->second;
+        vec.push_back(std::make_pair(method, handler));
+
+      } else {
+        auto vec = {std::make_pair(method, handler)};
+        route_list.emplace(route, vec);
+      }
+
+    }
 
   }
 

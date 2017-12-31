@@ -7,5 +7,8 @@ LABEL name="xrpc-cpp" \
 COPY . /xrpc-cpp/
 
 WORKDIR /xrpc-cpp
-
-
+RUN git clean -dfx
+RUN if [ -f CMakeCache.txt ] ; then rm CMakeCache.txt ; fi
+RUN cmake . 
+RUN make 
+run ./example_server

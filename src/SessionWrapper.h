@@ -21,9 +21,4 @@ class SessionWrapper : public proxygen::HTTPSession::InfoCallback {
   proxygen::HTTPUpstreamSession* operator->() const {
     return session_;
   }
-
-  // Note: you must not start any asynchronous work from onDestroy()
-  void onDestroy(const proxygen::HTTPSessionBase&) override {
-    session_ = nullptr;
-  }
 };
