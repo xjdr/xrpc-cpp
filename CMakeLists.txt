@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.8)
 project(xrpc_cpp)
 
 # package information
@@ -23,6 +23,8 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if (APPLE)
+    link_directories(/usr/local/lib)
+    include_directories(/usr/local/include)
     include_directories(xrpc_cpp /usr/local/Cellar/openssl/1.0.2m/include)
 endif ()
 
@@ -34,6 +36,11 @@ endif ()
 # External dependencies
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external)
 
+# Location where external projects will be downloaded
+set (DOWNLOAD_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/thrid_party"
+        CACHE PATH "Location where external projects will be downloaded.")
+mark_as_advanced(DOWNLOAD_LOCATION)
+
 #External Deps
 include(re2)
 include(zlib)
@@ -42,12 +49,40 @@ include(protobuf)
 include(boringssl)
 include(googletest)
 
-set(SOURCE_FILES src/XConfig.h src/Router.h src/XHttpMethod.h src/XrpcRequest.h src/RouterHandlerFactory.h src/RouterHandler.h src/RouterHandler.cpp src/RouterStats.h src/SessionWrapper.h src/Route.h)
+set(xrpc_EXTERNAL_LIBRARIES
+        ${re2_STATIC_LIBRARIES}
+        ${zlib_STATIC_LIBRARIES}
+        ${jemalloc_STATIC_LIBRARIES}
+        ${protobuf_STATIC_LIBRARIES}
+        ${boringssl_STATIC_LIBRARIES}
+        )
+
+include_directories(
+        ${re2_INCLUDE_DIR}
+        ${zlib_INCLUDE_DIR}
+        ${jemalloc_INCLUDE_DIR}
+        ${protobuf_INCLUDE_DIR}
+        ${boringssl_INCLUDE_DIR}
+)
+
+set(SOURCE_FILES
+        src/XConfig.h
+        src/Router.h
+        src/XHttpMethod.h
+        src/XrpcRequest.h
+        src/RouterHandlerFactory.h
+        src/RouterHandler.h
+        src/RouterHandler.cpp
+        src/RouterStats.h
+        src/SessionWrapper.h
+        src/Route.h)
+
+## Now for the real work
 add_library(xrpc_cpp ${SOURCE_FILES})
-target_link_libraries(xrpc_cpp ${boringssl_STATIC_LIBRARIES} ${re2_STATIC_LIBRARIES} ${jemalloc_STATIC_LIBRARIES} -lfolly -lwangle -lproxygenhttpserver -lproxygenlib -lglog -lgflags -lboost_system)
+target_link_libraries(xrpc_cpp -lre2 ${boringssl_STATIC_LIBRARIES} -lfolly -lwangle -lproxygenhttpserver -lproxygenlib -lglog -lgflags -lboost_system)
 
 if (APPLE)
-    target_link_libraries(xrpc_cpp -lboost_thread-mt)
+    target_link_libraries(xrpc_cpp -lboost_thread-mt -jemalloc)
 endif ()
 
 if (LINUX)

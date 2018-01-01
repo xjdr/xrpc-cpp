@@ -18,7 +18,7 @@ set(zlib_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external/zlib_archive)
 set(ZLIB_URL https://github.com/madler/zlib)
 set(ZLIB_BUILD ${CMAKE_CURRENT_BINARY_DIR}/zlib/src/zlib)
 set(ZLIB_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/zlib/install)
-set(ZLIB_TAG 50893291621658f355bc5b4d450a8d06a563053d)
+set(ZLIB_TAG cacf7f1)
 
 if(WIN32)
     set(zlib_STATIC_LIBRARIES
@@ -42,13 +42,9 @@ ExternalProject_Add(zlib
         BUILD_IN_SOURCE 1
         DOWNLOAD_DIR "${DOWNLOAD_LOCATION}"
         CMAKE_CACHE_ARGS
-        if(tensorflow_ENABLE_POSITION_INDEPENDENT_CODE)
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-        else()
-        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=OFF
-        endif()
         -DCMAKE_BUILD_TYPE:STRING=Release
         -DCMAKE_INSTALL_PREFIX:STRING=${ZLIB_INSTALL}
+        CXXFLAGS=-fPIC
         )
 
 # put zlib includes in the directory where they are expected

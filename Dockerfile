@@ -7,9 +7,10 @@ LABEL name="xrpc-cpp" \
 
 WORKDIR /cmake
 RUN git clone https://gitlab.kitware.com/cmake/cmake
-RUN cd cmake
 RUN ls -al
-RUN cmake . && \
+WORKDIR /cmake/cmake
+RUN ls -al
+RUN ./bootstrap && \
   make && \
   make install
 
@@ -18,7 +19,6 @@ RUN cmake --version
 COPY . /xrpc-cpp/
 
 WORKDIR /xrpc-cpp
-RUN git clean -dfx
 RUN if [ -f CMakeCache.txt ] ; then rm CMakeCache.txt ; fi
 RUN cmake . 
 RUN make 
