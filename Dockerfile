@@ -19,7 +19,7 @@ RUN cmake --version
 COPY . /xrpc-cpp/
 
 WORKDIR /xrpc-cpp
-RUN if [ -f CMakeCache.txt ] ; then rm CMakeCache.txt ; fi
-RUN cmake . 
+RUN git clean -dfx
+RUN cmake .
 RUN make 
-run ./example_server
+RUN ./example_server

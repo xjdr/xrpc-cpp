@@ -67,6 +67,7 @@ include_directories(
 
 set(SOURCE_FILES
         src/XConfig.h
+        src/Route.h
         src/Router.h
         src/XHttpMethod.h
         src/XrpcRequest.h
@@ -79,10 +80,11 @@ set(SOURCE_FILES
 
 ## Now for the real work
 add_library(xrpc_cpp ${SOURCE_FILES})
-target_link_libraries(xrpc_cpp -lre2 ${boringssl_STATIC_LIBRARIES} -lfolly -lwangle -lproxygenhttpserver -lproxygenlib -lglog -lgflags -lboost_system)
+add_dependencies(xrpc_cpp re2 boringssl jemalloc)
+target_link_libraries(xrpc_cpp -l${xrpc_EXTERNAL_LIBRARIES} -lfolly -lwangle -lproxygenhttpserver -lproxygenlib -lglog -lgflags -lboost_system)
 
 if (APPLE)
-    target_link_libraries(xrpc_cpp -lboost_thread-mt -jemalloc)
+    target_link_libraries(xrpc_cpp -lboost_thread-mt)
 endif ()
 
 if (LINUX)
@@ -91,7 +93,8 @@ endif ()
 
 ## Add an example server for testing
 add_executable(example_server src/ExampleServer.cpp)
-target_link_libraries(example_server xrpc_cpp)
+add_dependencies(example_server re2 boringssl jemalloc)
+target_link_libraries(example_server -l${re2_STATIC_LIBRARIES})
 
 ## Add an example server for testing
 add_executable(xrpc_cpp_test src/RouterTest.cpp src/RouterTest.cpp)
